@@ -1,13 +1,19 @@
 -- Get a list of the 3 long-standing customers for each country
 
-WITH standing_by_country AS(
+WITH first_order AS(
 SELECT
     customer_id,
     country,
-    order_date,
-    RANK() OVER(PARTITION BY country ORDER BY order_date) AS rank
+    MIN(order_date) as date_first_order
 FROM customers
 JOIN orders USING(customer_id)
+GROUP BY customer_id, country
+), 
+standing_by_country AS(
+SELECT
+    *,
+    RANK() OVER(PARTITION BY country ORDER BY date_first_order) AS rank
+FROM first_order
 ) 
 SELECT *
 FROM standing_by_country
